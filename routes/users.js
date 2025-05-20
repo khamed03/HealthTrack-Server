@@ -60,6 +60,24 @@ router.put('/:user_id', async (req, res) => {
 });
 
 
+// DELETE /api/users/:user_id
+router.delete('/:user_id', async (req, res) => {
+  try {
+    const { user_id } = req.params;
+
+    const pool = await poolPromise;
+
+    await pool
+      .request()
+      .input('user_id', sql.UniqueIdentifier, user_id)
+      .query(`DELETE FROM users WHERE user_id = @user_id`);
+
+    res.status(200).json({ message: 'User deleted successfully' });
+  } catch (err) {
+    console.error('Error deleting user:', err.message);
+    res.status(500).json({ error: 'Failed to delete user' });
+  }
+});
 
 
 module.exports = router;
