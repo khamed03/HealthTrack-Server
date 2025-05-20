@@ -3,6 +3,20 @@ const router = express.Router();
 const { sql, poolPromise } = require('../db');
 const { v4: uuidv4 } = require('uuid');
 
+
+// GET /api/patients
+router.get('/', async (req, res) => {
+  try {
+    const pool = await poolPromise;
+    const result = await pool.request().query('SELECT * FROM patients');
+    res.json(result.recordset);
+  } catch (err) {
+    console.error('Error fetching patients:', err);
+    res.status(500).json({ error: 'Failed to fetch patients' });
+  }
+});
+
+
 // 👉 POST /api/patients
 router.post('/', async (req, res) => {
   try {

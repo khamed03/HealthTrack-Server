@@ -2,29 +2,25 @@ const express = require('express');
 const router = express.Router();
 const { sql, poolPromise } = require('../db');
 
-router.post('/', async (req, res) => {
+// GET /api/records/:patient_id
+router.get('/:patient_id', async (req, res) => {
   try {
-    const { patient_id, date, diagnosis, treatment, notes, created_by } = req.body;
-
+    const { patient_id } = req.params;
     const pool = await poolPromise;
 
-    await pool
+    const result = await pool
       .request()
       .input('patient_id', sql.UniqueIdentifier, patient_id)
-      .input('date', sql.Date, date)
-      .input('diagnosis', sql.NVarChar, diagnosis)
-      .input('treatment', sql.NVarChar, treatment)
-      .input('notes', sql.NVarChar, notes)
-      .input('created_by', sql.UniqueIdentifier, created_by)
       .query(`
-        INSERT INTO medical_records (patient_id, date, diagnosis, treatment, notes, created_by)
-        VALUES (@patient_id, @date, @diagnosis, @treatment, @notes, @created_by)
+        SELECT * FROM medical_records
+        WHERE patient_id = @patient_id
+        ORDER BY date DESC
       `);
 
-    res.status(201).json({ message: 'Record inserted successfully.' });
+    res.json(result.recordset);
   } catch (err) {
-    console.error('Error inserting medical record:', err.message);
-    res.status(500).json({ error: 'Failed to save medical record.' });
+    console.error('Error fetching records:', err);
+    res.status(500).json({ error: 'Failed to fetch medical records' });
   }
 });
 
