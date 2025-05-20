@@ -1,27 +1,30 @@
-require('dotenv').config();
-const express = require('express');
-const cors = require('cors');
+require("dotenv").config();
+const express = require("express");
+const cors = require("cors");
 const app = express();
-const recordRoutes = require('./routes/records');
-const userRoutes = require('./routes/users');
-const patientRoutes = require('./routes/patients');
-
+const recordRoutes = require("./routes/records");
+const userRoutes = require("./routes/users");
+const patientRoutes = require("./routes/patients");
 
 app.use(cors());
 app.use(express.json());
 
 //routes
-app.use('/api/records', recordRoutes);
-app.use('/api/users', userRoutes);
-app.use('/api/patients', patientRoutes);
+app.use("/api/records", recordRoutes);
+app.use("/api/users", userRoutes);
+app.use("/api/patients", patientRoutes);
 
-app.get('/api/test-db', async (req, res) => {
+app.get("/api/test-db", async (req, res) => {
   try {
-    const pool = await require('./db').poolPromise;
-    const result = await pool.request().query('SELECT GETDATE() AS currentTime');
-    res.status(200).json({ success: true, time: result.recordset[0].currentTime });
+    const pool = await require("./db").poolPromise;
+    const result = await pool
+      .request()
+      .query("SELECT GETDATE() AS currentTime");
+    res
+      .status(200)
+      .json({ success: true, time: result.recordset[0].currentTime });
   } catch (err) {
-    console.error('Database test failed:', err);
+    console.error("Database test failed:", err);
     res.status(500).json({ success: false, error: err.message });
   }
 });
