@@ -3,12 +3,17 @@ const express = require('express');
 const cors = require('cors');
 const app = express();
 const recordRoutes = require('./routes/records');
+const userRoutes = require('./routes/users');
+const patientRoutes = require('./routes/patients');
 
 
 app.use(cors());
 app.use(express.json());
 
+//routes
 app.use('/api/records', recordRoutes);
+app.use('/api/users', userRoutes);
+app.use('/api/patients', patientRoutes);
 
 app.get('/api/test-db', async (req, res) => {
   try {
