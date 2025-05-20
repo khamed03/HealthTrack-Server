@@ -89,6 +89,25 @@ router.put('/:record_id', async (req, res) => {
 });
 
 
-module.exports = router;
+// DELETE /api/records/:record_id
+router.delete('/:record_id', async (req, res) => {
+  try {
+    const { record_id } = req.params;
+
+    const pool = await poolPromise;
+
+    await pool
+      .request()
+      .input('record_id', sql.UniqueIdentifier, record_id)
+      .query(`DELETE FROM medical_records WHERE id = @record_id`);
+
+    res.status(200).json({ message: 'Medical record deleted successfully' });
+  } catch (err) {
+    console.error('Error deleting medical record:', err.message);
+    res.status(500).json({ error: 'Failed to delete medical record' });
+  }
+});
+
+
 
 module.exports = router;
