@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const { v4: uuidv4 } = require('uuid');
 const { sql, poolPromise } = require("../db");
+const checkJwt = require('../middleware/auth');
 
 // GET /api/records/:patient_id
 router.get("/:patient_id", async (req, res) => {
@@ -24,16 +25,12 @@ router.get("/:patient_id", async (req, res) => {
   }
 });
 
-router.post('/', async (req, res) => {
+// POST /api/records with auth0
+router.post('/', checkJwt, async (req, res) => {
   try {
     const { patient_id, date, diagnosis, treatment, notes, created_by } = req.body;
-
-    // Validate required fields
-    if (!patient_id || !date || !diagnosis || !treatment || !created_by) {
-      return res.status(400).json({ error: 'Missing required fields' });
-    }
-
     const record_id = uuidv4();
+
     const pool = await poolPromise;
 
     await pool
@@ -43,16 +40,16 @@ router.post('/', async (req, res) => {
       .input('date', sql.Date, date)
       .input('diagnosis', sql.NVarChar, diagnosis)
       .input('treatment', sql.NVarChar, treatment)
-      .input('notes', sql.NVarChar, notes || '')
+      .input('notes', sql.NVarChar, notes)
       .input('created_by', sql.UniqueIdentifier, created_by)
       .query(`
         INSERT INTO medical_records (id, patient_id, date, diagnosis, treatment, notes, created_by)
         VALUES (@record_id, @patient_id, @date, @diagnosis, @treatment, @notes, @created_by)
       `);
 
-    res.status(201).json({ message: 'Medical record added successfully', record_id });
+    res.status(201).json({ message: 'Record inserted successfully' });
   } catch (err) {
-    console.error('Error inserting medical record:', err);
+    console.error('Error inserting record:', err.message);
     res.status(500).json({ error: 'Failed to save medical record' });
   }
 });
