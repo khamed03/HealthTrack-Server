@@ -13,7 +13,6 @@ exports.register = async (req, res) => {
   try {
     const pool = await poolPromise;
 
-    // Check if user exists
     const check = await pool.request()
       .input("email", sql.NVarChar, email)
       .query("SELECT * FROM Users WHERE email = @email");
@@ -22,11 +21,9 @@ exports.register = async (req, res) => {
       return res.status(409).json({ error: "Email already registered." });
     }
 
-    // Hash password
     const hashed = await bcrypt.hash(password, 10);
-
-    // Insert user
     const user_id = require("crypto").randomUUID();
+
     await pool.request()
       .input("user_id", sql.UniqueIdentifier, user_id)
       .input("email", sql.NVarChar, email)
@@ -38,11 +35,13 @@ exports.register = async (req, res) => {
       `);
 
     res.status(201).json({ message: "User registered successfully." });
+
   } catch (err) {
-    console.error("Register error:", err);
+    console.error("❌ Register error:", err);  // Add this line
     res.status(500).json({ error: "Server error during registration." });
   }
 };
+
 
 // Login
 exports.login = async (req, res) => {
