@@ -30,7 +30,8 @@ router.post("/", auth, async (req, res) => {
     return res.status(403).json({ error: "Only doctors can create records" });
   }
 
-  const { patient_id, diagnosis, treatment, notes, created_by } = req.body;
+  const { patient_id, diagnosis, treatment, notes, created_by, record_date } = req.body;
+
 
   try {
     const pool = await poolPromise;
@@ -43,10 +44,12 @@ router.post("/", auth, async (req, res) => {
       .input("treatment", sql.NVarChar, treatment)
       .input("notes", sql.NVarChar, notes)
       .input("created_by", sql.UniqueIdentifier, created_by)
+      .input("record_date", sql.Date, record_date)
       .query(`
-        INSERT INTO MedicalRecords (id, patient_id, diagnosis, treatment, notes, created_by)
-        VALUES (@record_id, @patient_id, @diagnosis, @treatment, @notes, @created_by)
+        INSERT INTO MedicalRecords (id, patient_id, diagnosis, treatment, notes, created_by, record_date)
+        VALUES (@record_id, @patient_id, @diagnosis, @treatment, @notes, @created_by, @record_date)
       `);
+
 
     res.status(201).json({ message: "Record created successfully" });
   } catch (err) {

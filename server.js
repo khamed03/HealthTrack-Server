@@ -5,6 +5,8 @@ const authRoutes = require("./routes/auth");
 const patientRoutes = require("./routes/patients");
 const recordRoutes = require("./routes/records");
 const appointmentRoutes = require("./routes/appointments");
+const dashboardRoutes = require("./routes/dashboard");
+
 
 dotenv.config();
 
@@ -19,6 +21,8 @@ app.use("/api/auth", authRoutes);
 app.use("/api/patients", patientRoutes);
 app.use("/api/records", recordRoutes);
 app.use("/api/appointments", appointmentRoutes);
+app.use("/api/dashboard", dashboardRoutes);
+
 
 // Fallback route (optional)
 app.use("/", (req, res) => {
