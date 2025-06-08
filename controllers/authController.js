@@ -1,88 +1,72 @@
-const bcrypt = require("bcryptjs");
-const jwt = require("jsonwebtoken");
-const { sql, poolPromise } = require("../db");
+import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
+import { v4 as uuidv4 } from "uuid";
+import pool from "../db.js";
 
-// Register
-exports.register = async (req, res) => {
-  const { email, password, role } = req.body;
-
-  if (!email || !password || !role) {
-    return res.status(400).json({ error: "All fields are required." });
-  }
-
+// REGISTER
+export const register = async (req, res) => {
   try {
-    const pool = await poolPromise;
+    const { email, password, role } = req.body;
 
-    const check = await pool.request()
-      .input("email", sql.NVarChar, email)
-      .query("SELECT * FROM Users WHERE email = @email");
-
-    if (check.recordset.length > 0) {
-      return res.status(409).json({ error: "Email already registered." });
+    if (!email || !password || !role) {
+      return res.status(400).json({ error: "Missing required fields" });
     }
 
-    const hashed = await bcrypt.hash(password, 10);
-    const user_id = require("crypto").randomUUID();
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const userId = uuidv4();
 
-    await pool.request()
-      .input("user_id", sql.UniqueIdentifier, user_id)
-      .input("email", sql.NVarChar, email)
-      .input("password_hash", sql.NVarChar, hashed)
-      .input("role", sql.NVarChar, role)
-      .query(`
-        INSERT INTO Users (user_id, email, password_hash, role)
-        VALUES (@user_id, @email, @password_hash, @role)
-      `);
+    console.log("✅ Connecting to DB:", {
+  db: process.env.PGDATABASE,
+  user: process.env.PGUSER,
+  host: process.env.PGHOST,
+});
 
-    res.status(201).json({ message: "User registered successfully." });
 
-  } catch (err) {
-    console.error("❌ Register error:", err);  // Add this line
+    const query = `
+      INSERT INTO Users (user_id, email, password_hash, role)
+      VALUES ($1, $2, $3, $4)
+    `;
+
+    await pool.query(query, [userId, email, hashedPassword, role]);
+
+    res.status(201).json({ message: "User registered successfully" });
+  } catch (error) {
+    console.error("❌ Register error:", error);
     res.status(500).json({ error: "Server error during registration." });
   }
 };
 
-
-// Login
-exports.login = async (req, res) => {
-  const { email, password } = req.body;
-
+// LOGIN
+export const login = async (req, res) => {
   try {
-    const pool = await poolPromise;
+    const { email, password } = req.body;
 
-    const result = await pool.request()
-      .input("email", sql.NVarChar, email)
-      .query("SELECT * FROM Users WHERE email = @email");
+    const result = await pool.query(
+      "SELECT * FROM Users WHERE email = $1",
+      [email]
+    );
 
-    const user = result.recordset[0];
+    const user = result.rows[0];
 
     if (!user) {
-      return res.status(401).json({ error: "Invalid credentials." });
+      return res.status(401).json({ error: "Invalid email or password" });
     }
 
-    const isMatch = await bcrypt.compare(password, user.password_hash);
+    const passwordMatch = await bcrypt.compare(password, user.password_hash);
 
-    if (!isMatch) {
-      return res.status(401).json({ error: "Invalid credentials." });
+    if (!passwordMatch) {
+      return res.status(401).json({ error: "Invalid email or password" });
     }
 
-    const payload = {
-      user_id: user.user_id,
-      email: user.email,
-      role: user.role
-    };
+    const token = jwt.sign(
+      { user_id: user.user_id, email: user.email, role: user.role },
+      process.env.JWT_SECRET,
+      { expiresIn: "1d" }
+    );
 
-    const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: "12h" });
-
-    res.json({
-  token,
-  role: user.role,
-  user_id: user.user_id,
-  email: user.email // ✅ make sure this is included
-});
-
-  } catch (err) {
-    console.error("Login error:", err);
+    res.json({ token, role: user.role, email: user.email });
+  } catch (error) {
+    console.error("❌ Login error:", error);
     res.status(500).json({ error: "Server error during login." });
   }
 };

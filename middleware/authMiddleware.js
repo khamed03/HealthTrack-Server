@@ -1,23 +1,26 @@
-const jwt = require("jsonwebtoken");
+import jwt from "jsonwebtoken";
 
-const authMiddleware = (req, res, next) => {
+export const authenticateToken = (req, res, next) => {
   const authHeader = req.headers.authorization;
 
-  // Check for token
-  if (!authHeader || !authHeader.startsWith("Bearer ")) {
-    return res.status(401).json({ error: "Authorization token missing." });
-  }
+  // Expect header like: Bearer <token>
+  const token = authHeader && authHeader.split(" ")[1];
 
-  const token = authHeader.split(" ")[1];
+  if (!token) return res.status(401).json({ error: "Access token missing" });
 
-  try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    req.user = decoded; // { user_id, email, role }
+  jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
+    if (err) return res.status(403).json({ error: "Invalid token" });
+
+    req.user = user; // user = { user_id, email, role }
     next();
-  } catch (err) {
-    console.error("JWT error:", err.message);
-    res.status(401).json({ error: "Invalid or expired token." });
-  }
+  });
 };
 
-module.exports = authMiddleware;
+export const authorizeRoles = (...roles) => {
+  return (req, res, next) => {
+    if (!roles.includes(req.user.role)) {
+      return res.status(403).json({ error: "Unauthorized role" });
+    }
+    next();
+  };
+};
