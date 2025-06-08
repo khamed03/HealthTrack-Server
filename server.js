@@ -1,10 +1,10 @@
-import express from "express";
-import cors from "cors";
-import authRoutes from "./routes/auth.js";
-import patientRoutes from "./routes/patients.js";
-import recordRoutes from "./routes/records.js";
-import appointmentRoutes from "./routes/appointments.js";
-import dashboardRoutes from "./routes/dashboard.js";
+const express = require("express");
+const cors = require("cors");
+const authRoutes = require("./routes/auth.js");
+const patientRoutes = require("./routes/patients.js");
+const recordRoutes = require("./routes/records.js");
+const appointmentRoutes = require("./routes/appointments.js");
+const dashboardRoutes = require("./routes/dashboard.js");
 
 const app = express();
 app.use(cors({
