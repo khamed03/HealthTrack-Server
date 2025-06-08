@@ -7,8 +7,10 @@ import appointmentRoutes from "./routes/appointments.js";
 import dashboardRoutes from "./routes/dashboard.js";
 
 const app = express();
-app.use(cors());
-app.use(express.json());
+app.use(cors({
+  origin: ["healthtrack-client-production.up.railway.app"],
+  credentials: true
+}));app.use(express.json());
 
 app.use("/api/auth", authRoutes);
 app.use("/api/patients", patientRoutes);
