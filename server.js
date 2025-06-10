@@ -15,7 +15,7 @@ app.use(cors({
   methods: ["GET", "POST", "PUT", "DELETE"],
   allowedHeaders: ["Content-Type", "Authorization"],
 }));
-console.log("✅ CORS setup for frontend: https://healthtrack-client-production.up.railway.app");
+console.log("CORS setup for frontend: https://healthtrack-client-production.up.railway.app");
 app.use(express.json());
 
 app.use("/api/auth", authRoutes);
