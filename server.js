@@ -7,7 +7,7 @@ import appointmentRoutes from "./routes/appointments.js";
 import dashboardRoutes from "./routes/dashboard.js";
 import dotenv from "dotenv";
 dotenv.config();
-
+//note
 
 const app = express();
 app.use(cors({
