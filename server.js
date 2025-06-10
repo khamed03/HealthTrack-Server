@@ -16,6 +16,10 @@ app.use(cors({
   allowedHeaders: ["Content-Type", "Authorization"],
 }));
 console.log("CORS setup for frontend: https://healthtrack-client-production.up.railway.app");
+
+app.options("*", cors());
+
+//middleware
 app.use(express.json());
 
 app.use("/api/auth", authRoutes);
