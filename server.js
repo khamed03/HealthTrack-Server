@@ -24,7 +24,6 @@ app.use("/api/records", recordRoutes);
 app.use("/api/appointments", appointmentRoutes);
 app.use("/api/dashboard", dashboardRoutes);
 
-app.get("/", (req, res) => res.send("HealthTrack API Running"));
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
