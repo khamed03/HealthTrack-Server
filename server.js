@@ -5,13 +5,15 @@ import patientRoutes from "./routes/patients.js";
 import recordRoutes from "./routes/records.js";
 import appointmentRoutes from "./routes/appointments.js";
 import dashboardRoutes from "./routes/dashboard.js";
+import dotenv from "dotenv";
+dotenv.config();
 
 
 const app = express();
 app.use(cors({
   origin: "https://healthtrack-client-production.up.railway.app",
   methods: ["GET", "POST", "PUT", "DELETE"],
-  credentials: true
+  allowedHeaders: ["Content-Type", "Authorization"],
 }));
 console.log("✅ CORS setup for frontend: https://healthtrack-client-production.up.railway.app");
 app.use(express.json());
