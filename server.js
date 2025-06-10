@@ -9,8 +9,11 @@ import dashboardRoutes from "./routes/dashboard.js";
 
 const app = express();
 app.use(cors({
-  origin: "https://healthtrack-client-production.up.railway.app"
+  origin: "https://healthtrack-client-production.up.railway.app",
+  methods: ["GET", "POST", "PUT", "DELETE"],
+  credentials: true
 }));
+console.log("✅ CORS setup for frontend: https://healthtrack-client-production.up.railway.app");
 app.use(express.json());
 
 app.use("/api/auth", authRoutes);
