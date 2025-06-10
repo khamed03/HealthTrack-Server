@@ -10,14 +10,20 @@ dotenv.config();
 
 
 const app = express();
+const allowedOrigins = ["https://healthtrack-client-production.up.railway.app"];
+
 app.use(cors({
-  origin: "https://healthtrack-client-production.up.railway.app",
-  methods: ["GET", "POST", "PUT", "DELETE"],
+  origin: function (origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
 }));
-console.log("CORS setup for frontend: https://healthtrack-client-production.up.railway.app");
 
-app.options("*", cors());
 
 //middleware
 app.use(express.json());
