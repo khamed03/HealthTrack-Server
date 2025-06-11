@@ -11,7 +11,15 @@ dotenv.config();
 
 const app = express();
 const allowedOrigins = ["https://healthtrack-client-production.up.railway.app"];
-app.use(cors());
+
+app.use(cors({
+  origin: "*",
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+}));
+
+
+app.options("*", cors());
 
 // app.use(cors({
 //   origin: function (origin, callback) {
